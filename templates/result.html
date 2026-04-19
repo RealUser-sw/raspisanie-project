@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результат обработки</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            width: 95%;
+            background: white;
+            color: black;
+        }
+
+        th, td {
+            border: 1px solid #999;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .table-title {
+            margin-top: 30px;
+        }
+
+        .text-block {
+            text-align: left;
+            max-width: 1000px;
+            margin: 20px auto;
+            white-space: pre-wrap;
+            background: white;
+            color: black;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Результат обработки PDF</h1>
+    <p><b>Файл:</b> {{ filename }}</p>
+
+    {% if extracted_tables %}
+        <h2>Найденные таблицы</h2>
+
+        {% for table in extracted_tables %}
+            <div class="table-title">
+                <b>Страница {{ table.page }}, таблица {{ table.table_number }}</b>
+            </div>
+
+            <table>
+                {% for row in table.rows %}
+                    <tr>
+                        {% for cell in row %}
+                            <td>{{ cell if cell else "" }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endfor %}
+    {% endif %}
+
+    {% if extracted_text %}
+        <h2>Текст, если таблицы не найдены</h2>
+        <div class="text-block">{{ extracted_text }}</div>
+    {% endif %}
+
+    <p><a href="/">Назад</a></p>
+</body>
+</html>

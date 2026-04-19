@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в админ-панель</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: #1e293b;
+            padding: 28px;
+            border-radius: 14px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        input {
+            margin-bottom: 14px;
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            cursor: pointer;
+        }
+
+        .flash {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+        }
+
+        .error {
+            background: #dc2626;
+        }
+
+        .success {
+            background: #16a34a;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Вход в админ-панель</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="post">
+            <input type="password" name="password" placeholder="Введите пароль" required>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+</body>
+</html>

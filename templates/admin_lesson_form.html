@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if lesson %}Редактирование{% else %}Добавление{% endif %} записи</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        button {
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-primary { background: #3b82f6; }
+        .btn-secondary { background: #64748b; }
+
+        a {
+            text-decoration: none;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>{% if lesson %}Редактирование записи{% else %}Добавление записи{% endif %}</h1>
+
+    <div class="card">
+        <form method="post">
+            <div class="field">
+                <label>Курс</label>
+                <input type="text" name="course_name" value="{{ lesson.course_name if lesson else '' }}" required>
+            </div>
+
+            <div class="field">
+                <label>Группа</label>
+                <input type="text" name="group_name" value="{{ lesson.group_name if lesson else '' }}" required>
+            </div>
+
+            <div class="field">
+                <label>День</label>
+                <select name="day" required>
+                    {% for day in days %}
+                        <option value="{{ day }}" {% if lesson and lesson.day == day %}selected{% endif %}>{{ day }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Номер пары</label>
+                <input type="number" name="lesson_number" min="1" max="6" value="{{ lesson.lesson_number if lesson else 1 }}" required>
+            </div>
+
+            <div class="field">
+                <label>Тип недели</label>
+                <select name="week_type" required>
+                    {% set current_week = lesson.week_type if lesson else 'both' %}
+                    <option value="both" {% if current_week == 'both' %}selected{% endif %}>both</option>
+                    <option value="odd" {% if current_week == 'odd' %}selected{% endif %}>odd</option>
+                    <option value="even" {% if current_week == 'even' %}selected{% endif %}>even</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Предмет</label>
+                <input type="text" name="subject" value="{{ lesson.subject if lesson else '' }}">
+            </div>
+
+            <div class="field">
+                <label>Аудитория</label>
+                <input type="text" name="room" value="{{ lesson.room if lesson else '' }}">
+            </div>
+
+            <div class="field">
+                <label>Преподаватель</label>
+                <input type="text" name="teacher" value="{{ lesson.teacher if lesson else '' }}">
+            </div>
+
+            <div class="field">
+                <label>Подгруппа</label>
+                <input type="text" name="subgroup" value="{{ lesson.subgroup if lesson else '' }}">
+            </div>
+
+            <div class="field">
+                <label>Примечание</label>
+                <textarea name="note">{{ lesson.note if lesson else '' }}</textarea>
+            </div>
+
+            <div class="field">
+                <label>Страница PDF</label>
+                <input type="number" name="page" value="{{ lesson.page if lesson else '' }}">
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn-primary">Сохранить</button>
+                <a href="{{ url_for('admin_lessons') }}"><button type="button" class="btn-secondary">Назад</button></a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

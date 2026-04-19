@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание занятий</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f3f6fb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-soft: #dbeafe;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            --radius: 18px;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 18px 40px rgba(37, 99, 235, 0.22);
+            margin-bottom: 22px;
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .hero h1 {
+            margin: 0 0 10px;
+            font-size: 34px;
+            line-height: 1.15;
+        }
+
+        .week-switch-form {
+            margin: 0;
+        }
+
+        .week-pill-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: bold;
+            white-space: nowrap;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .week-pill-button:hover {
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+        }
+
+        .panel,
+        .content-card,
+        .lesson-card,
+        .empty-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .panel {
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .panel h2 {
+            margin: 0 0 18px;
+            font-size: 22px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .field select,
+        .field input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
+            color: var(--text);
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .field select:focus,
+        .field input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 13px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .content-card {
+            padding: 22px;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .content-title {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .content-subtitle {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .meta-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .meta-badge {
+            background: var(--primary-soft);
+            color: var(--primary-dark);
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .schedule-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .lesson-card {
+            overflow: hidden;
+            border: 1px solid #edf2f7;
+        }
+
+        .lesson-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 18px;
+            background: #eff6ff;
+            border-bottom: 1px solid #dbeafe;
+            flex-wrap: wrap;
+        }
+
+        .lesson-top-active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-bottom: 1px solid #1d4ed8;
+        }
+
+        .lesson-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-dark);
+        }
+
+        .lesson-top-active .lesson-number {
+            color: white;
+        }
+
+        .lesson-time {
+            background: white;
+            border: 1px solid #dbeafe;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #374151;
+            white-space: nowrap;
+        }
+
+        .lesson-top-active .lesson-time {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .lesson-now-badge {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            font-size: 13px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        .lesson-body {
+            padding: 18px;
+        }
+
+        .lesson-item {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+        }
+
+        .lesson-item + .lesson-item {
+            margin-top: 12px;
+        }
+
+        .lesson-row {
+            margin: 6px 0;
+            line-height: 1.45;
+            font-size: 15px;
+        }
+
+        .lesson-row strong {
+            color: #111827;
+        }
+
+        .empty-card {
+            padding: 24px;
+        }
+
+        .empty-card h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+
+        .empty-card p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .footer-note {
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 18px;
+        }
+
+        .group-dropdown {
+            position: relative;
+        }
+
+        .group-options {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+            z-index: 20;
+            display: none;
+        }
+
+        .group-options.show {
+            display: block;
+        }
+
+        .group-option {
+            padding: 12px 14px;
+            cursor: pointer;
+            font-size: 15px;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .group-option:last-child {
+            border-bottom: none;
+        }
+
+        .group-option:hover,
+        .group-option.active {
+            background: #eff6ff;
+            color: var(--primary-dark);
+        }
+
+        .group-empty {
+            padding: 12px 14px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .hidden-select {
+            display: none;
+        }
+
+        @media (max-width: 980px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                position: static;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 14px;
+            }
+
+            .hero {
+                padding: 22px;
+                border-radius: 20px;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .content-card,
+            .panel,
+            .lesson-card,
+            .empty-card {
+                border-radius: 16px;
+            }
+
+            .lesson-top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .lesson-time {
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <section class="hero">
+            <div class="hero-top">
+                <div>
+                    <h1>Расписание занятий</h1>
+                </div>
+
+                <form method="post" class="week-switch-form">
+                    <input type="hidden" name="toggle_week" value="1">
+                    <input type="hidden" name="course" value="{{ selected_course or '' }}">
+                    <input type="hidden" name="group" value="{{ selected_group or '' }}">
+                    <input type="hidden" name="day" value="{{ selected_day or '' }}">
+
+                    <button type="submit" class="week-pill-button">
+                        Текущая неделя:
+                        {{ "чётная" if current_week_type == "even" else "нечётная" }}
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <div class="layout">
+            <aside class="panel">
+                <h2>Параметры</h2>
+
+                <form method="post" autocomplete="off">
+                    <div class="field">
+                        <label for="course">Курс</label>
+                        <select name="course" id="course" onchange="this.form.submit()">
+                            <option value="">Выберите курс</option>
+                            {% for course in courses %}
+                                <option value="{{ course }}" {% if course == selected_course %}selected{% endif %}>
+                                    {{ course }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="groupSearch">Группа</label>
+
+                        <div class="group-dropdown">
+                            <input
+                                type="text"
+                                id="groupSearch"
+                                placeholder="Выберите группу"
+                                value="{{ selected_group or '' }}"
+                                {% if not selected_course %}disabled{% endif %}
+                            >
+
+                            <input type="hidden" name="group" id="groupHidden" value="{{ selected_group or '' }}">
+
+                            <div id="groupOptions" class="group-options {% if selected_course %}{% endif %}">
+                                {% if groups %}
+                                    {% for group in groups %}
+                                        <div
+                                            class="group-option"
+                                            data-value="{{ group }}"
+                                        >
+                                            {{ group }}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="group-empty">Сначала выберите курс</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="day">День недели</label>
+                        <select name="day" id="day">
+                            {% for day in days %}
+                                <option value="{{ day }}" {% if day == selected_day %}selected{% endif %}>
+                                    {{ day }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Показать расписание</button>
+                </form>
+            </aside>
+
+            <main>
+                <div class="content-card">
+                    <div class="content-header">
+                        <div>
+                            <h2 class="content-title">Расписание</h2>
+                            <div class="content-subtitle">
+                                {% if selected_group %}
+                                    Показаны занятия для группы {{ selected_group }}
+                                {% else %}
+                                    Выбери курс, группу и день недели
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="meta-badges">
+                            {% if selected_course %}
+                                <div class="meta-badge">{{ selected_course }}</div>
+                            {% endif %}
+                            {% if selected_day %}
+                                <div class="meta-badge">{{ selected_day }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if selected_group %}
+                        {% if schedule %}
+                            <div class="schedule-list">
+                                {% for pair in schedule %}
+                                    <article class="lesson-card">
+                                        <div class="lesson-top {% if pair.number == current_pair_number %}lesson-top-active{% endif %}">
+                                            <div class="lesson-number">
+                                                {{ pair.number }} пара
+                                                {% if pair.number == current_pair_number %}
+                                                    <span class="lesson-now-badge">идёт сейчас</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="lesson-time">{{ pair.time }}</div>
+                                        </div>
+
+                                        <div class="lesson-body">
+                                            {% for lesson in pair.data %}
+                                                <div class="lesson-item">
+                                                    {% if lesson.subject %}
+                                                        <div class="lesson-row"><strong>Предмет:</strong> {{ lesson.subject }}</div>
+                                                    {% endif %}
+
+                                                    {% if lesson.room %}
+                                                        <div class="lesson-row"><strong>Аудитория:</strong> {{ lesson.room }}</div>
+                                                    {% endif %}
+
+                                                    {% if lesson.teacher %}
+                                                        <div class="lesson-row"><strong>Преподаватель:</strong> {{ lesson.teacher }}</div>
+                                                    {% endif %}
+
+                                                    {% if lesson.subgroup %}
+                                                        <div class="lesson-row"><strong>Подгруппа:</strong> {{ lesson.subgroup }}</div>
+                                                    {% endif %}
+
+                                                    {% if lesson.note %}
+                                                        <div class="lesson-row"><strong>Примечание:</strong> {{ lesson.note }}</div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </article>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-card">
+                                <h3>Занятий не найдено</h3>
+                                <p>Для выбранной группы на этот день расписание отсутствует.</p>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="empty-card">
+                            <h3>Выбор ещё не сделан</h3>
+                            <p>Сначала выбери курс, группу и день недели, а затем нажми кнопку показа расписания.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="footer-note">
+                    Актуальность расписания зависит от последней загрузки PDF через админ-панель.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const groupSearchInput = document.getElementById("groupSearch");
+        const groupHiddenInput = document.getElementById("groupHidden");
+        const groupOptionsBox = document.getElementById("groupOptions");
+        let groupOptions = Array.from(document.querySelectorAll(".group-option"));
+        let activeIndex = -1;
+
+        function openGroupOptions() {
+            if (groupSearchInput.disabled) return;
+            if (groupOptions.length > 0) {
+                groupOptionsBox.classList.add("show");
+            }
+        }
+
+        function closeGroupOptions() {
+            groupOptionsBox.classList.remove("show");
+            activeIndex = -1;
+            clearActiveOption();
+        }
+
+        function clearActiveOption() {
+            groupOptions.forEach(option => option.classList.remove("active"));
+        }
+
+        function setActiveOption(index) {
+            clearActiveOption();
+
+            if (index < 0 || index >= groupOptions.length) {
+                activeIndex = -1;
+                return;
+            }
+
+            activeIndex = index;
+            groupOptions[activeIndex].classList.add("active");
+            groupOptions[activeIndex].scrollIntoView({ block: "nearest" });
+        }
+
+        function selectGroup(value, label) {
+            groupHiddenInput.value = value;
+            groupSearchInput.value = label;
+            closeGroupOptions();
+        }
+
+        function filterGroupOptions() {
+            const query = groupSearchInput.value.trim().toUpperCase();
+
+            groupOptions = Array.from(document.querySelectorAll(".group-option"));
+            let visibleCount = 0;
+
+            groupOptions.forEach(option => {
+                const text = option.dataset.value.toUpperCase();
+                const visible = text.startsWith(query) || text.includes(query);
+
+                option.style.display = visible ? "" : "none";
+
+                if (visible) {
+                    visibleCount += 1;
+                }
+            });
+
+            const emptyNode = document.querySelector(".group-empty");
+            if (emptyNode) {
+                emptyNode.remove();
+            }
+
+            if (visibleCount === 0) {
+                const div = document.createElement("div");
+                div.className = "group-empty";
+                div.textContent = "Ничего не найдено";
+                groupOptionsBox.appendChild(div);
+            }
+
+            openGroupOptions();
+            activeIndex = -1;
+            clearActiveOption();
+        }
+
+        if (groupSearchInput) {
+            groupSearchInput.addEventListener("focus", () => {
+                filterGroupOptions();
+            });
+
+            groupSearchInput.addEventListener("input", () => {
+                groupHiddenInput.value = "";
+                filterGroupOptions();
+            });
+
+            groupSearchInput.addEventListener("keydown", (event) => {
+                const visibleOptions = groupOptions.filter(option => option.style.display !== "none");
+
+                if (!groupOptionsBox.classList.contains("show") && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+                    openGroupOptions();
+                }
+
+                if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    if (visibleOptions.length === 0) return;
+
+                    const nextIndex = activeIndex + 1 >= visibleOptions.length ? 0 : activeIndex + 1;
+                    const realIndex = groupOptions.indexOf(visibleOptions[nextIndex]);
+                    setActiveOption(realIndex);
+                }
+
+                if (event.key === "ArrowUp") {
+                    event.preventDefault();
+                    if (visibleOptions.length === 0) return;
+
+                    const nextIndex = activeIndex - 1 < 0 ? visibleOptions.length - 1 : activeIndex - 1;
+                    const realIndex = groupOptions.indexOf(visibleOptions[nextIndex]);
+                    setActiveOption(realIndex);
+                }
+
+                if (event.key === "Enter") {
+                    if (activeIndex !== -1 && groupOptions[activeIndex].style.display !== "none") {
+                        event.preventDefault();
+                        const option = groupOptions[activeIndex];
+                        selectGroup(option.dataset.value, option.dataset.value);
+                    }
+                }
+
+                if (event.key === "Escape") {
+                    closeGroupOptions();
+                }
+            });
+        }
+
+        document.addEventListener("click", (event) => {
+            if (!event.target.closest(".group-dropdown")) {
+                closeGroupOptions();
+            }
+        });
+
+        document.querySelectorAll(".group-option").forEach(option => {
+            option.addEventListener("click", () => {
+                selectGroup(option.dataset.value, option.dataset.value);
+            });
+        });
+    </script>
+</body>
+</html>

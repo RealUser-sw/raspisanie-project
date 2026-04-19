@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ панель</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 15px;
+            background: #0f172a;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-form {
+            margin: 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.2s;
+            color: white;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            background: #3b82f6;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-success {
+            background: #1d703c;
+        }
+        .btn-logout {
+            background: #dc2626;
+        }
+
+        /* Все кнопки при наведении становятся серыми */
+        button:hover {
+            background: #64748b !important;
+        }
+
+        .flash {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #16a34a;
+        }
+
+        .error {
+            background: #dc2626;
+        }
+
+        .file-list {
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .file-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+            word-break: break-word;
+        }
+
+        .muted {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: -6px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>⚙️ Админ панель</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <h2>📄 Загрузка расписания</h2>
+
+        <form method="post" enctype="multipart/form-data">
+            <label>Выбери курс</label>
+            <select name="course_name" required>
+                <option value="">-- выбрать --</option>
+                <option value="1 курс">1 курс</option>
+                <option value="2 курс">2 курс</option>
+                <option value="3 курс">3 курс</option>
+                <option value="4 курс">4 курс</option>
+                <option value="5 курс">5 курс</option>
+            </select>
+
+            <label>PDF файл</label>
+            <input type="file" name="pdf_file" accept=".pdf" required>
+
+            <button type="submit" name="upload_pdf" class="btn-primary">
+                Загрузить расписание
+            </button>
+        </form>
+
+        <div class="muted">
+        </div>
+
+        <div class="actions">
+            <form method="post" class="action-form">
+                <button type="submit" name="update_db" class="btn-secondary"
+                        onclick="return confirm('Обновить базу данных по всем загруженным PDF файлам?');">
+                    Обновить базу данных
+                </button>
+            </form>
+
+            <form method="post" class="action-form">
+                <button type="submit" name="clear_db" class="btn-danger"
+                        onclick="return confirm('Точно очистить базу данных? Это действие нельзя быстро отменить.');">
+                    Очистить базу данных
+                </button>
+            </form>
+
+            <form method="post" class="action-form">
+                <button type="submit" name="clear_files" class="btn-danger"
+                        onclick="return confirm('Точно удалить все PDF файлы?');">
+                    Удалить все PDF файлы
+                </button>
+            </form>
+
+            <form action="{{ url_for('admin_lessons') }}" method="get" class="action-form">
+                <button type="submit" class="btn-success">
+                    Открыть редактор расписания
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📅 Текущая неделя</h2>
+
+        <form method="post">
+            <select name="week_type">
+                <option value="odd" {% if current_week_type == "odd" %}selected{% endif %}>
+                    Нечётная
+                </option>
+                <option value="even" {% if current_week_type == "even" %}selected{% endif %}>
+                    Чётная
+                </option>
+            </select>
+
+            <button type="submit" class="btn-secondary">
+                Сохранить
+            </button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>📂 Загруженные файлы</h2>
+
+        <div class="file-list">
+            {% for file in uploaded_files %}
+                <div class="file-item">
+                    {{ file }}
+                </div>
+            {% else %}
+                <div>Нет загруженных файлов</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div style="margin-top: 20px; text-align: center;">
+        <form action="{{ url_for('admin_logout') }}" method="get" style="display: inline-block;">
+            <button type="submit" class="btn-logout" style="width:auto; padding:10px 20px;">
+                Выйти из админки
+            </button>
+        </form>
+    </div>
+
+</div>
+
+</body>
+</html>
